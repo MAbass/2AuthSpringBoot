@@ -18,7 +18,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role addRole(Role role) {
-        // add comment
+        // remove comment
         return roleRepo.save(role);
     }
 }
