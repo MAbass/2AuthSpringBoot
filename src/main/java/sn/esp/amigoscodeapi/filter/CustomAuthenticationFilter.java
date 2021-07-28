@@ -33,7 +33,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        // Add comment
+        // Add comment plus
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         log.info("Username is {}", username);
