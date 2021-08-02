@@ -56,7 +56,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     log.error("Error to decode token and message is {}", e.getMessage());
                     response.setHeader("error", e.getMessage());
                     response.setStatus(HttpStatus.FORBIDDEN.value());
-//                    response.sendError(HttpStatus.FORBIDDEN.value());
                     Map<String, String> errors = new HashMap<>();
                     errors.put("error", e.getMessage());
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);

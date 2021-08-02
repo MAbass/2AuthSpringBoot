@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sn.esp.amigoscodeapi.CustomUserDetails;
 import sn.esp.amigoscodeapi.entity.Role;
 import sn.esp.amigoscodeapi.entity.User;
 import sn.esp.amigoscodeapi.repo.RoleRepo;
@@ -37,11 +38,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         } else {
             log.info("User {} is found in the database", username);
         }
-        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        user.getRoleCollection().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        });
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+        return new CustomUserDetails(user);
     }
 
     @Override

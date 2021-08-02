@@ -14,7 +14,7 @@ import sn.esp.amigoscodeapi.service.UserServiceImpl;
 import java.util.ArrayList;
 
 @SpringBootApplication
-public class AmigosCodeApiApplication {
+public class AmigosCodeApiApplication{
 
     public static void main(String[] args) {
         SpringApplication.run(AmigosCodeApiApplication.class, args);
