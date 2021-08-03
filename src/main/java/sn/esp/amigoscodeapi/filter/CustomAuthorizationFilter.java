@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -37,6 +36,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 try {
+                    log.info("Authorization Header: {} ", authorizationHeader);
                     String token = authorizationHeader.substring("Bearer ".length());
                     Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
                     JWTVerifier jwtVerifier = JWT.require(algorithm).build();
@@ -53,7 +53,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     filterChain.doFilter(request, response);
 
                 } catch (Exception e) {
-                    log.error("Error to decode token and message is {}", e.getMessage());
+                    log.info("Error to decode token and message is {}", e.getMessage());
                     response.setHeader("error", e.getMessage());
                     response.setStatus(HttpStatus.FORBIDDEN.value());
                     Map<String, String> errors = new HashMap<>();
@@ -61,9 +61,14 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                     new ObjectMapper().writeValue(response.getOutputStream(), errors);
                 }
-            }
-            else {
-                filterChain.doFilter(request, response);
+            } else {
+                log.info("Token authorization has not providing");
+                response.setHeader("error", "You don't have permission to access to this resource");
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                Map<String, String> errors = new HashMap<>();
+                errors.put("error", "You don't have permission to access to this resource");
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), errors);
             }
         }
     }
