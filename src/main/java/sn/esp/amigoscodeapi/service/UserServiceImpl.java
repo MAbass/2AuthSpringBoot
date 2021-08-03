@@ -2,22 +2,19 @@ package sn.esp.amigoscodeapi.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sn.esp.amigoscodeapi.CustomUserDetails;
+import sn.esp.amigoscodeapi.details.CustomUserDetails;
 import sn.esp.amigoscodeapi.entity.Role;
 import sn.esp.amigoscodeapi.entity.User;
 import sn.esp.amigoscodeapi.repo.RoleRepo;
 import sn.esp.amigoscodeapi.repo.UserRepo;
 import sn.esp.amigoscodeapi.service.interfaces.UserService;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Service
