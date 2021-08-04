@@ -11,6 +11,7 @@ import sn.esp.amigoscodeapi.entity.Role;
 import sn.esp.amigoscodeapi.entity.User;
 import sn.esp.amigoscodeapi.service.RoleServiceImpl;
 import sn.esp.amigoscodeapi.service.UserServiceImpl;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.ArrayList;
 

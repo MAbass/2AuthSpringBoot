@@ -19,57 +19,65 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.stream;
 
 @Slf4j
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
+    private static final String[] AUTH_LIST = {
+            "/v2/api-docs",
+            "/configuration/ui",
+            "/api/login",
+            "/api/token/refresh",
+            "/swagger-ui.html"
+    };
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().equals("/api/login") || request.getServletPath().equals("/api/token/refresh")) {
-            filterChain.doFilter(request, response);
-        } else {
-            String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                try {
-                    log.info("Authorization Header: {} ", authorizationHeader);
-                    String token = authorizationHeader.substring("Bearer ".length());
-                    Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
-                    JWTVerifier jwtVerifier = JWT.require(algorithm).build();
-                    DecodedJWT decodedJWT = jwtVerifier.verify(token);
-                    String username = decodedJWT.getSubject();
-                    String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
-                    Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                    stream(roles).forEach(role -> {
-                        authorities.add(new SimpleGrantedAuthority(role));
-                    });
-                    UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(username, null, authorities);
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    filterChain.doFilter(request, response);
+        for (String path : AUTH_LIST) {
+            if (request.getServletPath().equals(path) || request.getServletPath().startsWith("/webjars/") || request.getServletPath().startsWith("/swagger-resources")) {
+                log.info("Filter authorize");
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            try {
+                log.info("Authorization Header: {} ", authorizationHeader);
+                String token = authorizationHeader.substring("Bearer ".length());
+                Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+                JWTVerifier jwtVerifier = JWT.require(algorithm).build();
+                DecodedJWT decodedJWT = jwtVerifier.verify(token);
+                String username = decodedJWT.getSubject();
+                String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
+                Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                stream(roles).forEach(role -> {
+                    authorities.add(new SimpleGrantedAuthority(role));
+                });
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                filterChain.doFilter(request, response);
 
-                } catch (Exception e) {
-                    log.info("Error to decode token and message is {}", e.getMessage());
-                    response.setHeader("error", e.getMessage());
-                    response.setStatus(HttpStatus.FORBIDDEN.value());
-                    Map<String, String> errors = new HashMap<>();
-                    errors.put("error", e.getMessage());
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    new ObjectMapper().writeValue(response.getOutputStream(), errors);
-                }
-            } else {
-                log.info("Token authorization has not providing");
-                response.setHeader("error", "You don't have permission to access to this resource");
+            } catch (Exception e) {
+                log.info("Error to decode token and message is {}", e.getMessage());
+                response.setHeader("error", e.getMessage());
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 Map<String, String> errors = new HashMap<>();
-                errors.put("error", "You don't have permission to access to this resource");
+                errors.put("error", e.getMessage());
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), errors);
             }
+        } else {
+            log.info("Token authorization has not providing");
+            response.setHeader("error", "You don't have permission to access to this resource");
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            Map<String, String> errors = new HashMap<>();
+            errors.put("error", "You don't have permission to access to this resource");
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            new ObjectMapper().writeValue(response.getOutputStream(), errors);
         }
     }
 }
