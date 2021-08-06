@@ -58,11 +58,13 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 });
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(username, null, authorities);
+                // we set a security context holder because all of request need a authentication. if we don't set the
+                // context the value of authentication is null
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 filterChain.doFilter(request, response);
 
             } catch (Exception e) {
-                log.info("Error to decode token and message is {}", e.getMessage());
+                log.error("Error to decode token and message is {}", e.getMessage());
                 response.setHeader("error", e.getMessage());
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 Map<String, String> errors = new HashMap<>();
