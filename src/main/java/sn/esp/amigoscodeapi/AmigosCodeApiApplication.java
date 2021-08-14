@@ -1,5 +1,7 @@
 package sn.esp.amigoscodeapi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,18 +19,19 @@ import java.util.ArrayList;
 
 @SpringBootApplication
 @EnableScheduling
-public class AmigosCodeApiApplication{
+public class AmigosCodeApiApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(AmigosCodeApiApplication.class, args);
     }
 
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
-    CommandLineRunner run(UserServiceImpl userService, RoleServiceImpl roleService){
+    CommandLineRunner run(UserServiceImpl userService, RoleServiceImpl roleService) {
         return args -> {
             roleService.addRole(new Role(null, "ROLE_USER"));
             roleService.addRole(new Role(null, "ROLE_ADMIN"));
