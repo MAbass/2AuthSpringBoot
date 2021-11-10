@@ -38,7 +38,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        log.info("I'm try to connect");
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 
